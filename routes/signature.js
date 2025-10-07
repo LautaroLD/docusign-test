@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const { getDocuSignClient, getEnvelopesApi, getEnvelopesStatus, getEnvelopeDocuments } = require('../lib/docusign');
 
@@ -7,18 +9,25 @@ router.post('/send', async (req, res) => {
     const {
       signerEmail,
       signerName,
-      documentBase64,
     } = req.body;
 
-    if (!signerEmail || !signerName || !documentBase64) {
+    if (!signerEmail || !signerName) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
     // iniciar el cliente y la api del sobre
     const client = await getDocuSignClient();
     const envelopesApi = getEnvelopesApi(client);
+    // Ruta al archivo PDF
+    const filePath = path.join(process.cwd(), "files", "documento.pdf");
+
+    // Leer el archivo como buffer
+    const pdfBuffer = fs.readFileSync(filePath);
+
+    // Convertir a Base64
+    const pdfBase64 = pdfBuffer.toString("base64");
 
     const document = {
-      documentBase64,
+      documentBase64: pdfBase64,
       name: "contrato-de-crédito",
       fileExtension: 'pdf',
       documentId: '2',
