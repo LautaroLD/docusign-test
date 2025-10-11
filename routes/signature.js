@@ -9,9 +9,11 @@ router.post('/send', async (req, res) => {
     const {
       signerEmail,
       signerName,
+      signerNumber,
+      signerCountryCode
     } = req.body;
 
-    if (!signerEmail || !signerName) {
+    if (!signerEmail || !signerName || !signerNumber || !signerCountryCode) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
     // iniciar el cliente y la api del sobre
@@ -30,57 +32,105 @@ router.post('/send', async (req, res) => {
       documentBase64: pdfBase64,
       name: "contrato-de-crédito",
       fileExtension: 'pdf',
-      documentId: '2',
+      documentId: '1',
     };
 
-    const signHereTab = {
-      anchorString: '/sn1/',
+    const signHereTabClient = {
+      anchorString: '/sign-client/', // texto de anclaje en el documento, puede ser cualquier texto que este en el documento, debe ser único
       anchorUnits: 'pixels',
-      anchorXOffset: '0',
-      anchorYOffset: '0',
+      anchorXOffset: '0', // desplazamiento en x desde el anclaje
+      anchorYOffset: '0', // desplazamiento en y desde el anclaje
       documentId: '1',
       pageNumber: '1',
-      recipientId: '1',
       tabLabel: 'Firma aquí',
     };
-    const nameSignerTab = {
-      anchorString: '/name1/',
+    const nameSignerTabClient = {
+      anchorString: '/name-client/',
       anchorUnits: 'pixels',
       anchorXOffset: '0',
       anchorYOffset: '0',
       documentId: '1',
       pageNumber: '1',
-      recipientId: '1',
+      locked: true,
       tabLabel: 'Nombre completo',
     };
 
-    const dateSignedTab = {
-      anchorString: '/date1/',
+    const dateSignedTabClient = {
+      anchorString: '/date-client/',
       anchorUnits: 'pixels',
       anchorXOffset: '0',
       anchorYOffset: '0',
       documentId: '1',
       pageNumber: '1',
-      recipientId: '1',
       tabLabel: 'Fecha',
     };
+    const cuitSignedTabClient = {
+      anchorString: '/cuit-client/',
+      anchorUnits: 'pixels',
+      anchorXOffset: '0',
+      anchorYOffset: '0',
+      documentId: '1',
+      pageNumber: '1',
+      tabLabel: 'CUIT',
+      value: '123456789', // reemplazar por el valor real de la pyme
+      locked: true, // no permite editar el campo
+    };
+    const amountTabClient = {
+      anchorString: '/amount-client/',
+      anchorUnits: 'pixels',
+      anchorXOffset: '0',
+      anchorYOffset: '0',
+      documentId: '1',
+      pageNumber: '1',
+      tabLabel: 'Monto',
+      value: '$100000', // reemplazar por el valor real del monto
+      locked: true, // no permite editar el campo
+    };
+    const quotesTabClient = {
+      anchorString: '/quotes-client/',
+      anchorUnits: 'pixels',
+      anchorXOffset: '0',
+      anchorYOffset: '0',
+      documentId: '1',
+      pageNumber: '1',
+      tabLabel: 'Cuotas',
+      value: '12', // reemplazar por el valor real de las cuotas
+      locked: true, // no permite editar el campo
+    };
+    // agrega las tabs al firmante
+    // para agregar mas tabs, primero definir el objeto y luego agregarlo al array correspondiente
+    // textTabs es para campos de texto (que no son firma, nombre o fecha)
+    // fullNameTabs es para el nombre completo
+    // dateSignedTabs es para la fecha
+    // signHereTabs es para la firma
 
-    const tabs = {
-      signHereTabs: [signHereTab],
-      dateSignedTabs: [dateSignedTab],
-      fullNameTabs: [nameSignerTab],
+    const tabsClient = {
+      fullNameTabs: [nameSignerTabClient],
+      dateSignedTabs: [dateSignedTabClient],
+      signHereTabs: [signHereTabClient],
+      textTabs: [cuitSignedTabClient, amountTabClient, quotesTabClient],
     };
 
-    const signer = {
+    const signClient = {
       email: signerEmail,
       name: signerName,
       recipientId: '1',
-      routingOrder: '1',
-      clientUserId: '1',
-      tabs,
+      clientUserId: '1', // necesario para identificar que es un firmante embebido para envelopesApi.createRecipientView y devolver la url del documento. cuando se indica este campo, no se envia el email al firmante
+      identityVerification: {
+        workflowId: process.env.DOCUSIGN_IDENTITY_WORKFLOW_ID,
+        inputOptions: [
+          {
+            name: "phone_number_list",
+            valueType: "PhoneNumberList",
+            phoneNumberList: [
+              { countryCode: signerCountryCode, number: signerNumber }
+            ]
+          }
+        ]
+      },
+      tabs: tabsClient,
     };
-
-    const recipients = { signers: [signer] };
+    const recipients = { signers: [signClient] };
 
     const envelopeDefinition = {
       emailSubject: 'Por favor firma el contrato para continuar con el proceso',
@@ -89,11 +139,13 @@ router.post('/send', async (req, res) => {
       recipients,
       status: 'sent',
     };
-    // crea y envia el sobre
+    // crea el sobre 
     const results = await envelopesApi.createEnvelope(
       process.env.DOCUSIGN_ACCOUNT_ID,
       { envelopeDefinition }
     );
+    console.log(results, 'results');
+
     // obtiene la url para firmar
     const signUrl = await envelopesApi.createRecipientView(
       process.env.DOCUSIGN_ACCOUNT_ID,
@@ -104,13 +156,13 @@ router.post('/send', async (req, res) => {
           authenticationMethod: "none",
           email: signerEmail,
           userName: signerName,
-          clientUserId: signer.clientUserId,
+          clientUserId: signClient.clientUserId,
         }
       }
     );
 
     return res.json({
-      signUrl: signUrl.url,
+      signUrl: signUrl.url, // url para redirigir al firmante
       success: true,
       envelopeId: results.envelopeId,
       status: results.status,
