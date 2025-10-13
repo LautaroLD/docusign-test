@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
-const { getDocuSignClient, getEnvelopesApi, getEnvelopesStatus, getEnvelopeDocuments } = require('../lib/docusign');
+const { getDocuSignClient, getEnvelopesApi, getEnvelopesStatus, getEnvelopeDocuments } = require('../../lib/docusign');
 
 router.post('/send', async (req, res) => {
   try {
@@ -144,7 +144,6 @@ router.post('/send', async (req, res) => {
       process.env.DOCUSIGN_ACCOUNT_ID,
       { envelopeDefinition }
     );
-    console.log(results, 'results');
 
     // obtiene la url para firmar
     const signUrl = await envelopesApi.createRecipientView(
