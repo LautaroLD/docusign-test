@@ -30,6 +30,7 @@ router.post('/send', async (req, res) => {
     const { monto, cant_cuo, monto_final, interes } = loan;
     const { email, nombre, apellido } = user;
     const [countryCode, phoneNumber] = phone.split("-");
+    const amountQuotes = monto_final ? monto_final / cant_cuo : monto / cant_cuo;
     const document = {
       documentBase64: pdfBase64,
       name: "contrato-de-crédito",
@@ -132,7 +133,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Cuota',
-        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final / cant_cuo ?? monto / cant_cuo), // reemplazar por el valor real de la cuota
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountQuotes), // reemplazar por el valor real de la cuota
         locked: true, // no permite editar el campo
       },
       amountFinal: {
