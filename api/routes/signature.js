@@ -7,16 +7,12 @@ const { getDocuSignClient, getEnvelopesApi, getEnvelopesStatus, getEnvelopeDocum
 router.post('/send', async (req, res) => {
   try {
     const {
-      email,
-      name,
-      phone,
-      countryCode,
-      cuit_cuil,
-      amount,
-      quotes,
+      user,
+      pyme,
+      loan
     } = req.body;
 
-    if (!email || !name || !phone || !countryCode) {
+    if (!user || !pyme || !loan) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
     // iniciar el cliente y la api del sobre
@@ -30,36 +26,74 @@ router.post('/send', async (req, res) => {
 
     // Convertir a Base64
     const pdfBase64 = pdfBuffer.toString("base64");
-
+    const { cuit, address, name: pymeName, phone } = pyme;
+    const { amount, quotes, amountQuotes, amountFinal, tna } = loan;
+    const { email, name } = user;
+    const [countryCode, phoneNumber] = phone.split("-");
     const document = {
       documentBase64: pdfBase64,
       name: "contrato-de-crédito",
       fileExtension: 'pdf',
       documentId: '1',
     };
-
-    const signHereTabClient = {
-      anchorString: '/sign-client/', // texto de anclaje en el documento, puede ser cualquier texto que este en el documento, debe ser único
-      anchorUnits: 'pixels',
-      anchorXOffset: '0', // desplazamiento en x desde el anclaje
-      anchorYOffset: '0', // desplazamiento en y desde el anclaje
-      documentId: '1',
-      pageNumber: '1',
-      tabLabel: 'Firma aquí',
+    const signerTabs = {
+      sign: {
+        anchorString: '/s1/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Firma aquí',
+      },
+      fullName: {
+        anchorString: '/n1/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        locked: true,
+        tabLabel: 'Nombre completo',
+      },
     };
-    const nameSignerTabClient = {
-      anchorString: '/name-client/',
-      anchorUnits: 'pixels',
-      anchorXOffset: '0',
-      anchorYOffset: '0',
-      documentId: '1',
-      pageNumber: '1',
-      locked: true,
-      tabLabel: 'Nombre completo',
+    const pymeTabs = {
+      cuit: {
+        anchorString: '/t_pyme_cuit/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'CUIT',
+        value: cuit, // reemplazar por el valor real de la pyme
+        locked: true, // no permite editar el campo
+      },
+      address: {
+        anchorString: '/t_pyme_domicilio/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Domicilio',
+        value: address, // reemplazar por el valor real de la pyme
+        locked: true, // no permite editar el campo
+      },
+      name: {
+        anchorString: '/t_pyme_razon_social/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Razón social',
+        value: pymeName, // reemplazar por el valor real de la pyme
+        locked: true, // no permite editar el campo
+      }
     };
-
-    const dateSignedTabClient = {
-      anchorString: '/date-client/',
+    const dateTabs = {
+      anchorString: '/t_fecha_emision/',
       anchorUnits: 'pixels',
       anchorXOffset: '0',
       anchorYOffset: '0',
@@ -67,38 +101,62 @@ router.post('/send', async (req, res) => {
       pageNumber: '1',
       tabLabel: 'Fecha',
     };
-    const cuitSignedTabClient = {
-      anchorString: '/cuit-client/',
-      anchorUnits: 'pixels',
-      anchorXOffset: '0',
-      anchorYOffset: '0',
-      documentId: '1',
-      pageNumber: '1',
-      tabLabel: 'CUIT',
-      value: cuit_cuil, // reemplazar por el valor real de la pyme
-      locked: true, // no permite editar el campo
-    };
-    const amountTabClient = {
-      anchorString: '/amount-client/',
-      anchorUnits: 'pixels',
-      anchorXOffset: '0',
-      anchorYOffset: '0',
-      documentId: '1',
-      pageNumber: '1',
-      tabLabel: 'Monto',
-      value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount), // reemplazar por el valor real del monto
-      locked: true, // no permite editar el campo
-    };
-    const quotesTabClient = {
-      anchorString: '/quotes-client/',
-      anchorUnits: 'pixels',
-      anchorXOffset: '0',
-      anchorYOffset: '0',
-      documentId: '1',
-      pageNumber: '1',
-      tabLabel: 'Cuotas',
-      value: quotes, // reemplazar por el valor real de las cuotas
-      locked: true, // no permite editar el campo
+    const loanTabs = {
+      amount: {
+        anchorString: '/t_prestamo_monto/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Monto',
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount), // reemplazar por el valor real del monto
+        locked: true, // no permite editar el campo
+      },
+      quotes: {
+        anchorString: '/t_prestamo_nro_cuotas/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Cuotas',
+        value: quotes, // reemplazar por el valor real de las cuotas
+        locked: true, // no permite editar el campo
+      },
+      amountQuotes: {
+        anchorString: '/t_prestamo_monto_cuota/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Cuota',
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountQuotes), // reemplazar por el valor real de la cuota
+        locked: true, // no permite editar el campo
+      },
+      amountFinal: {
+        anchorString: '/t_prestamo_final/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'Monto final',
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountFinal), // reemplazar por el valor real del monto de la cuota
+        locked: true, // no permite editar el campo
+      },
+      tna: {
+        anchorString: '/t_prestamo_tna/',
+        anchorUnits: 'pixels',
+        anchorXOffset: '0',
+        anchorYOffset: '0',
+        documentId: '1',
+        pageNumber: '1',
+        tabLabel: 'TNA',
+        value: tna, // reemplazar por el valor real de la tna
+        locked: true, // no permite editar el campo
+      }
     };
     // agrega las tabs al firmante
     // para agregar mas tabs, primero definir el objeto y luego agregarlo al array correspondiente
@@ -108,10 +166,10 @@ router.post('/send', async (req, res) => {
     // signHereTabs es para la firma
 
     const tabsClient = {
-      fullNameTabs: [nameSignerTabClient],
-      dateSignedTabs: [dateSignedTabClient],
-      signHereTabs: [signHereTabClient],
-      textTabs: [cuitSignedTabClient, amountTabClient, quotesTabClient],
+      fullNameTabs: [signerTabs.fullName],
+      dateSignedTabs: [dateTabs],
+      signHereTabs: [signerTabs.sign],
+      textTabs: [pymeTabs.cuit, pymeTabs.address, pymeTabs.name, loanTabs.amount, loanTabs.quotes, loanTabs.amountQuotes, loanTabs.amountFinal, loanTabs.tna],
     };
 
     const signClient = {
@@ -126,7 +184,7 @@ router.post('/send', async (req, res) => {
             name: "phone_number_list",
             valueType: "PhoneNumberList",
             phoneNumberList: [
-              { countryCode: countryCode, number: phone }
+              { countryCode: countryCode, number: phoneNumber }
             ]
           }
         ]
