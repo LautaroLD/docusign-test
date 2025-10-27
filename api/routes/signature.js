@@ -118,7 +118,7 @@ router.post('/send', async (req, res) => {
       email: email,
       name: name,
       recipientId: '1',
-      clientUserId: '1', // necesario para identificar que es un firmante embebido para envelopesApi.createRecipientView y devolver la url del documento. cuando se indica este campo, no se envia el email al firmante
+      // clientUserId: '1', // necesario para identificar que es un firmante embebido para envelopesApi.createRecipientView y devolver la url del documento. cuando se indica este campo, no se envia el email al firmante
       identityVerification: {
         workflowId: process.env.DOCUSIGN_IDENTITY_WORKFLOW_ID,
         inputOptions: [
