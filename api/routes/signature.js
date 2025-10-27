@@ -166,7 +166,7 @@ router.post('/send', async (req, res) => {
         pageNumber: '1',
         tabLabel: 'TNA',
         height: "15",
-        value: `% ${tna}`, // reemplazar por el valor real de la tna
+        value: `% ${interes}`, // reemplazar por el valor real de la tna
         locked: true, // no permite editar el campo
       }
     };
