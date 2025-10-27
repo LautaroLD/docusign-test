@@ -27,8 +27,8 @@ router.post('/send', async (req, res) => {
     // Convertir a Base64
     const pdfBase64 = pdfBuffer.toString("base64");
     const { cuit, address, name: pymeName, phone } = pyme;
-    const { amount, quotes, amountQuotes, amountFinal, tna } = loan;
-    const { email, name } = user;
+    const { amount, quotes, amountQuotes, amountFinal, interes } = loan;
+    const { email, nombre, apellido } = user;
     const [countryCode, phoneNumber] = phone.split("-");
     const document = {
       documentBase64: pdfBase64,
@@ -154,7 +154,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'TNA',
-        value: tna, // reemplazar por el valor real de la tna
+        value: interes, // reemplazar por el valor real de la tna
         locked: true, // no permite editar el campo
       }
     };
@@ -174,7 +174,7 @@ router.post('/send', async (req, res) => {
 
     const signClient = {
       email: email,
-      name: name,
+      name: `${nombre} ${apellido}`,
       recipientId: '1',
       // clientUserId: '1', // necesario para identificar que es un firmante embebido para envelopesApi.createRecipientView y devolver la url del documento. cuando se indica este campo, no se envia el email al firmante
       identityVerification: {
