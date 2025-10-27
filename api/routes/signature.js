@@ -7,13 +7,16 @@ const { getDocuSignClient, getEnvelopesApi, getEnvelopesStatus, getEnvelopeDocum
 router.post('/send', async (req, res) => {
   try {
     const {
-      signerEmail,
-      signerName,
-      signerNumber,
-      signerCountryCode
+      email,
+      name,
+      phone,
+      countryCode,
+      cuit_cuil,
+      amount,
+      quotes,
     } = req.body;
 
-    if (!signerEmail || !signerName || !signerNumber || !signerCountryCode) {
+    if (!email || !name || !phone || !countryCode) {
       return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
     // iniciar el cliente y la api del sobre
@@ -72,7 +75,7 @@ router.post('/send', async (req, res) => {
       documentId: '1',
       pageNumber: '1',
       tabLabel: 'CUIT',
-      value: '123456789', // reemplazar por el valor real de la pyme
+      value: cuit_cuil, // reemplazar por el valor real de la pyme
       locked: true, // no permite editar el campo
     };
     const amountTabClient = {
@@ -83,7 +86,7 @@ router.post('/send', async (req, res) => {
       documentId: '1',
       pageNumber: '1',
       tabLabel: 'Monto',
-      value: '$100000', // reemplazar por el valor real del monto
+      value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount), // reemplazar por el valor real del monto
       locked: true, // no permite editar el campo
     };
     const quotesTabClient = {
@@ -94,7 +97,7 @@ router.post('/send', async (req, res) => {
       documentId: '1',
       pageNumber: '1',
       tabLabel: 'Cuotas',
-      value: '12', // reemplazar por el valor real de las cuotas
+      value: quotes, // reemplazar por el valor real de las cuotas
       locked: true, // no permite editar el campo
     };
     // agrega las tabs al firmante
@@ -112,8 +115,8 @@ router.post('/send', async (req, res) => {
     };
 
     const signClient = {
-      email: signerEmail,
-      name: signerName,
+      email: email,
+      name: name,
       recipientId: '1',
       clientUserId: '1', // necesario para identificar que es un firmante embebido para envelopesApi.createRecipientView y devolver la url del documento. cuando se indica este campo, no se envia el email al firmante
       identityVerification: {
@@ -123,7 +126,7 @@ router.post('/send', async (req, res) => {
             name: "phone_number_list",
             valueType: "PhoneNumberList",
             phoneNumberList: [
-              { countryCode: signerCountryCode, number: signerNumber }
+              { countryCode: countryCode, number: phone }
             ]
           }
         ]
@@ -153,8 +156,8 @@ router.post('/send', async (req, res) => {
         recipientViewRequest: {
           returnUrl: "http://localhost:3001?envelopeId=" + results.envelopeId,
           authenticationMethod: "none",
-          email: signerEmail,
-          userName: signerName,
+          email: email,
+          userName: name,
           clientUserId: signClient.clientUserId,
         }
       }
