@@ -26,8 +26,8 @@ router.post('/send', async (req, res) => {
 
     // Convertir a Base64
     const pdfBase64 = pdfBuffer.toString("base64");
-    const { cuit, address, name: pymeName, phone } = pyme;
-    const { amount, quotes, amountQuotes, amountFinal, interes } = loan;
+    const { cuil_cuit, address, company_name, phone } = pyme;
+    const { monto, cant_cuo, monto_final, interes } = loan;
     const { email, nombre, apellido } = user;
     const [countryCode, phoneNumber] = phone.split("-");
     const document = {
@@ -66,7 +66,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'CUIT',
-        value: cuit, // reemplazar por el valor real de la pyme
+        value: cuil_cuit, // reemplazar por el valor real de la pyme
         locked: true, // no permite editar el campo
       },
       address: {
@@ -88,7 +88,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Razón social',
-        value: pymeName, // reemplazar por el valor real de la pyme
+        value: company_name, // reemplazar por el valor real de la pyme
         locked: true, // no permite editar el campo
       }
     };
@@ -110,7 +110,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Monto',
-        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount), // reemplazar por el valor real del monto
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto), // reemplazar por el valor real del monto
         locked: true, // no permite editar el campo
       },
       quotes: {
@@ -121,7 +121,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Cuotas',
-        value: quotes, // reemplazar por el valor real de las cuotas
+        value: cant_cuo, // reemplazar por el valor real de las cuotas
         locked: true, // no permite editar el campo
       },
       amountQuotes: {
@@ -132,7 +132,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Cuota',
-        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountQuotes), // reemplazar por el valor real de la cuota
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final / cant_cuo ?? monto / cant_cuo), // reemplazar por el valor real de la cuota
         locked: true, // no permite editar el campo
       },
       amountFinal: {
@@ -143,7 +143,7 @@ router.post('/send', async (req, res) => {
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Monto final',
-        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountFinal), // reemplazar por el valor real del monto de la cuota
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final ?? monto), // reemplazar por el valor real del monto de la cuota
         locked: true, // no permite editar el campo
       },
       tna: {
