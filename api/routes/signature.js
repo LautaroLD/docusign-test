@@ -42,20 +42,22 @@ router.post('/send', async (req, res) => {
         anchorString: '/s1/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Firma aquí',
+        height: "15",
       },
       fullName: {
         anchorString: '/n1/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         locked: true,
         tabLabel: 'Nombre completo',
+        height: "15",
       },
     };
     const pymeTabs = {
@@ -63,10 +65,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_pyme_cuit/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'CUIT',
+        height: "15",
         value: cuil_cuit, // reemplazar por el valor real de la pyme
         locked: true, // no permite editar el campo
       },
@@ -74,10 +77,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_pyme_domicilio/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Domicilio',
+        height: "15",
         value: address, // reemplazar por el valor real de la pyme
         locked: true, // no permite editar el campo
       },
@@ -85,10 +89,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_pyme_razon_social/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Razón social',
+        height: "15",
         value: company_name, // reemplazar por el valor real de la pyme
         locked: true, // no permite editar el campo
       }
@@ -97,20 +102,22 @@ router.post('/send', async (req, res) => {
       anchorString: '/t_fecha_emision/',
       anchorUnits: 'pixels',
       anchorXOffset: '0',
-      anchorYOffset: '0',
+      anchorYOffset: '-7.5',
       documentId: '1',
       pageNumber: '1',
       tabLabel: 'Fecha',
+      height: "15",
     };
     const loanTabs = {
       amount: {
         anchorString: '/t_prestamo_monto/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Monto',
+        height: "15",
         value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto), // reemplazar por el valor real del monto
         locked: true, // no permite editar el campo
       },
@@ -118,10 +125,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_prestamo_nro_cuotas/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Cuotas',
+        height: "15",
         value: cant_cuo, // reemplazar por el valor real de las cuotas
         locked: true, // no permite editar el campo
       },
@@ -129,10 +137,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_prestamo_monto_cuota/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Cuota',
+        height: "15",
         value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amountQuotes), // reemplazar por el valor real de la cuota
         locked: true, // no permite editar el campo
       },
@@ -140,10 +149,11 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_prestamo_final/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'Monto final',
+        height: "15",
         value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final ?? monto), // reemplazar por el valor real del monto de la cuota
         locked: true, // no permite editar el campo
       },
@@ -151,11 +161,12 @@ router.post('/send', async (req, res) => {
         anchorString: '/t_prestamo_tna/',
         anchorUnits: 'pixels',
         anchorXOffset: '0',
-        anchorYOffset: '0',
+        anchorYOffset: '-7.5',
         documentId: '1',
         pageNumber: '1',
         tabLabel: 'TNA',
-        value: interes, // reemplazar por el valor real de la tna
+        height: "15",
+        value: `% ${tna}`, // reemplazar por el valor real de la tna
         locked: true, // no permite editar el campo
       }
     };
