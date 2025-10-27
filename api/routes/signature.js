@@ -149,22 +149,22 @@ router.post('/send', async (req, res) => {
     );
 
     // obtiene la url para firmar
-    const signUrl = await envelopesApi.createRecipientView(
-      process.env.DOCUSIGN_ACCOUNT_ID,
-      results.envelopeId,
-      {
-        recipientViewRequest: {
-          returnUrl: "http://localhost:3001?envelopeId=" + results.envelopeId,
-          authenticationMethod: "none",
-          email: email,
-          userName: name,
-          clientUserId: signClient.clientUserId,
-        }
-      }
-    );
+    // const signUrl = await envelopesApi.createRecipientView(
+    //   process.env.DOCUSIGN_ACCOUNT_ID,
+    //   results.envelopeId,
+    //   {
+    //     recipientViewRequest: {
+    //       returnUrl: "http://localhost:3001?envelopeId=" + results.envelopeId,
+    //       authenticationMethod: "none",
+    //       email: email,
+    //       userName: name,
+    //       clientUserId: signClient.clientUserId,
+    //     }
+    //   }
+    // );
 
     return res.json({
-      signUrl: signUrl.url, // url para redirigir al firmante
+      // signUrl: signUrl.url, // url para redirigir al firmante
       success: true,
       envelopeId: results.envelopeId,
       status: results.status,
