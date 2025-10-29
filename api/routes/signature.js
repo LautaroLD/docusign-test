@@ -9,7 +9,8 @@ router.post('/send', async (req, res) => {
     const {
       user,
       pyme,
-      loan
+      loan,
+      quotas
     } = req.body;
 
     if (!user || !pyme || !loan) {
@@ -30,7 +31,7 @@ router.post('/send', async (req, res) => {
     const { monto, cant_cuo, monto_final, interes } = loan;
     const { email, nombre, apellido } = user;
     const [countryCode, phoneNumber] = phone.split("-");
-    const amountQuotes = monto_final ? monto_final / cant_cuo : monto / cant_cuo;
+    const amountQuotes = quotas[0].amount;
     const document = {
       documentBase64: pdfBase64,
       name: "contrato-de-crédito",
@@ -154,7 +155,7 @@ router.post('/send', async (req, res) => {
         pageNumber: '1',
         tabLabel: 'Monto final',
         height: "15",
-        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final ?? monto), // reemplazar por el valor real del monto de la cuota
+        value: Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto_final), // reemplazar por el valor real del monto de la cuota
         locked: true, // no permite editar el campo
       },
       tna: {
